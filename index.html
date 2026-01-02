@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ISI – Home</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+.search-box{
+  padding:12px;
+}
+.search-box input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #ccc;
+}
+.categories{
+  display:flex;
+  overflow-x:auto;
+  padding:10px;
+  gap:8px;
+}
+.categories::-webkit-scrollbar{display:none}
+.category{
+  padding:8px 14px;
+  border-radius:999px;
+  background:#e6edff;
+  color:#2563eb;
+  font-weight:600;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.category.active{
+  background:#2563eb;
+  color:#fff;
+}
+.product-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  padding:12px;
+}
+.product-card{
+  background:#fff;
+  border-radius:14px;
+  padding:10px;
+  box-shadow:0 6px 14px rgba(0,0,0,.08);
+}
+.product-card img{
+  width:100%;
+  border-radius:12px;
+}
+.product-card h4{
+  margin:6px 0;
+  font-size:15px;
+}
+.price{
+  font-weight:700;
+  margin-bottom:6px;
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div onclick="history.back()">←</div>
+  <div onclick="goHome()">ISI</div>
+  <div onclick="goCart()">🛒 <span id="cartCount">0</span></div>
+</header>
+
+<div class="search-box">
+  <input type="text" id="search" placeholder="Search products..." onkeyup="searchProduct()">
+</div>
+
+<div class="categories">
+  <div class="category active" onclick="filterCat('all',this)">All</div>
+  <div class="category" onclick="filterCat('Fashion',this)">Fashion</div>
+  <div class="category" onclick="filterCat('Beauty',this)">Beauty</div>
+  <div class="category" onclick="filterCat('Electronics',this)">Electronics</div>
+  <div class="category" onclick="filterCat('Grocery',this)">Grocery</div>
+  <div class="category" onclick="filterCat('Vegetable',this)">Vegetable</div>
+  <div class="category" onclick="filterCat('Fruit',this)">Fruit</div>
+  <div class="category" onclick="filterCat('Meat',this)">Meat</div>
+  <div class="category" onclick="filterCat('Biryani',this)">Biryani</div>
+  <div class="category" onclick="filterCat('Mithai',this)">Mithai</div>
+</div>
+
+<div id="productList" class="product-grid"></div>
+
+<script src="js/data.js"></script>
+
+<script>
+let allProducts = getData("products");
+
+function render(products){
+  const box = document.getElementById("productList");
+  if(!products.length){
+    box.innerHTML="<p style='text-align:center'>No products available</p>";
+    return;
+  }
+  box.innerHTML = products.map(p=>`
+    <div class="product-card">
+      <img src="${p.img || 'https://via.placeholder.com/300'}">
+      <h4>${p.name}</h4>
+      <div class="price">₹${p.price}</div>
+      <button onclick="addToCart(${p.id})">Add to Cart</button>
+    </div>
+  `).join("");
+}
+
+function filterCat(cat,el){
+  document.querySelectorAll(".category").forEach(c=>c.classList.remove("active"));
+  el.classList.add("active");
+  if(cat==="all") render(allProducts);
+  else render(allProducts.filter(p=>p.category===cat));
+}
+
+function searchProduct(){
+  const q = search.value.toLowerCase();
+  render(allProducts.filter(p=>p.name.toLowerCase().includes(q)));
+}
+
+function addToCart(id){
+  const cart = getData("cart");
+  const item = allProducts.find(p=>p.id===id);
+  cart.push(item);
+  setData("cart",cart);
+  updateCartCount();
+  alert("Added to cart");
+}
+
+function updateCartCount(){
+  cartCount.innerText = getData("cart").length;
+}
+
+function goCart(){ location.href="cart.html"; }
+function goHome(){ location.href="index.html"; }
+
+render(allProducts);
+updateCartCount();
+</script>
+
+</body>
+</html>
