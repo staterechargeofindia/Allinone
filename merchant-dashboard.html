@@ -8,54 +8,89 @@
 <link rel="stylesheet" href="css/style.css">
 
 <style>
-.dashboard-btn{
-  margin-bottom:12px;
+/* SIDE MENU */
+.side-menu{
+  position:fixed;
+  top:0; left:-260px;
+  width:260px; height:100%;
+  background:#fff;
+  box-shadow:4px 0 15px rgba(0,0,0,.2);
+  z-index:5000;
+  transition:.3s;
+  padding:14px;
 }
+.side-menu.active{ left:0 }
+.side-menu a{
+  display:block;
+  padding:12px 6px;
+  font-weight:600;
+  color:#2563eb;
+  text-decoration:none;
+}
+.side-menu hr{
+  border:none;
+  border-top:1px solid #eee;
+  margin:10px 0;
+}
+.menu-header{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+
+/* DASHBOARD */
 .profile-box{
   background:#e6edff;
-  border-radius:14px;
+  border-radius:16px;
   padding:14px;
   margin-bottom:14px;
 }
 .profile-box b{
-  display:block;
-  margin-bottom:4px;
+  font-size:16px;
+}
+.dashboard-btn{
+  margin-bottom:10px;
 }
 </style>
 </head>
 
 <body>
 
+<!-- SIDE MENU -->
+<div id="sideMenu" class="side-menu">
+  <div class="menu-header">
+    <b>Menu</b>
+    <span onclick="toggleMenu()">✖</span>
+  </div>
+
+  <a href="index.html">🏠 Home</a>
+  <a href="merchant-dashboard.html">📊 Dashboard</a>
+  <a href="publish-product.html">➕ Publish Product</a>
+  <a href="merchant-products.html">📦 My Products</a>
+  <a href="merchant-orders.html">🧾 My Orders</a>
+
+  <hr>
+
+  <a href="admin-login.html">🛡️ Admin Login</a>
+</div>
+
 <!-- HEADER -->
 <header class="topbar">
-  <div onclick="history.back()">←</div>
+  <div onclick="toggleMenu()">☰</div>
   <div>Merchant Dashboard</div>
-  <div onclick="goHome()">🏠</div>
+  <div onclick="logout()">🚪</div>
 </header>
 
 <div class="container">
 
   <!-- MERCHANT INFO -->
-  <div class="profile-box" id="merchantInfo"></div>
+  <div id="merchantInfo" class="profile-box"></div>
 
   <!-- ACTIONS -->
   <div class="card">
-    <button class="dashboard-btn" onclick="goPublish()">
-      ➕ Publish New Product
-    </button>
-
-    <button class="dashboard-btn secondary" onclick="goMyProducts()">
-      📦 My Products
-    </button>
-
-    <button class="dashboard-btn secondary" onclick="goOrders()">
-      🧾 My Orders
-    </button>
-
-    <button class="dashboard-btn" style="background:#ef4444"
-      onclick="logout()">
-      🚪 Logout
-    </button>
+    <button class="dashboard-btn" onclick="goPublish()">➕ Publish New Product</button>
+    <button class="dashboard-btn secondary" onclick="goProducts()">📦 My Products</button>
+    <button class="dashboard-btn secondary" onclick="goOrders()">🧾 My Orders</button>
   </div>
 
 </div>
@@ -64,34 +99,29 @@
 <script src="js/data.js"></script>
 
 <script>
-function goHome(){ location.href="index.html"; }
+/* MENU */
+function toggleMenu(){
+  sideMenu.classList.toggle("active");
+}
 
-/* ---------- auth check ---------- */
+/* AUTH CHECK */
 const merchant = JSON.parse(localStorage.getItem("merchantSession"));
 if(!merchant){
   location.href="merchant-login.html";
 }
 
-/* ---------- show merchant info ---------- */
-merchantInfo.innerHTML = `
-  <b>${merchant.shopName}</b>
+/* SHOW INFO */
+document.getElementById("merchantInfo").innerHTML = `
+  <b>${merchant.shopName}</b><br>
   <small>Merchant ID: ${merchant.id}</small>
 `;
 
-/* ---------- navigation ---------- */
-function goPublish(){
-  location.href="publish-product.html";
-}
+/* NAV */
+function goPublish(){ location.href="publish-product.html"; }
+function goProducts(){ location.href="merchant-products.html"; }
+function goOrders(){ location.href="merchant-orders.html"; }
 
-function goMyProducts(){
-  location.href="merchant-products.html";
-}
-
-function goOrders(){
-  location.href="merchant-orders.html";
-}
-
-/* ---------- logout ---------- */
+/* LOGOUT */
 function logout(){
   localStorage.removeItem("merchantSession");
   location.href="merchant-login.html";
