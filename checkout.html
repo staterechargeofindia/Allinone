@@ -8,17 +8,33 @@
 <link rel="stylesheet" href="css/style.css">
 
 <style>
-/* ---------- extra checkout styles ---------- */
-.address-box{
-  background:#f9fbff;
-  border:2px dashed #2563eb;
-  border-radius:14px;
+/* SIDE MENU */
+.side-menu{
+  position:fixed;
+  top:0; left:-260px;
+  width:260px; height:100%;
+  background:#fff;
+  box-shadow:4px 0 15px rgba(0,0,0,.2);
+  z-index:5000;
+  transition:.3s;
   padding:14px;
-  margin-bottom:12px;
-  font-size:14px;
-  line-height:1.6;
+}
+.side-menu.active{ left:0 }
+.side-menu a{
+  display:block;
+  padding:12px 6px;
+  font-weight:600;
+  color:#2563eb;
+  text-decoration:none;
+}
+.side-menu hr{ border:none;border-top:1px solid #eee;margin:10px 0 }
+.menu-header{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
 }
 
+/* PAYMENT */
 .method{
   padding:14px;
   border-radius:14px;
@@ -28,25 +44,12 @@
   cursor:pointer;
   margin-bottom:10px;
 }
-
 .method.active{
   border-color:#2563eb;
   background:#e6edff;
 }
 
-#upiBox{
-  display:none;
-  text-align:center;
-  margin-top:10px;
-}
-
-.total-box{
-  font-size:18px;
-  font-weight:800;
-  margin-bottom:12px;
-}
-
-/* ---------- success popup + confetti ---------- */
+/* SUCCESS */
 #successBox{
   position:fixed;
   inset:0;
@@ -56,7 +59,6 @@
   justify-content:center;
   z-index:3000;
 }
-
 .popup{
   background:#fff;
   padding:24px;
@@ -64,53 +66,56 @@
   width:90%;
   max-width:360px;
   text-align:center;
-  animation:zoom .3s ease;
 }
-
-@keyframes zoom{
-  from{transform:scale(.8);opacity:0}
-  to{transform:scale(1);opacity:1}
-}
-
 .confetti{
   position:fixed;
   top:-10px;
   width:8px;
   height:14px;
-  opacity:.9;
   animation:fall linear forwards;
-  pointer-events:none;
 }
-
 @keyframes fall{
-  to{
-    transform:translateY(110vh) rotate(360deg);
-    opacity:0;
-  }
+  to{ transform:translateY(110vh) rotate(360deg); opacity:0 }
 }
 </style>
 </head>
 
 <body>
 
+<!-- SIDE MENU -->
+<div id="sideMenu" class="side-menu">
+  <div class="menu-header">
+    <b>Menu</b>
+    <span onclick="toggleMenu()">✖</span>
+  </div>
+
+  <a href="index.html">🏠 Home</a>
+  <a href="cart.html">🛒 Cart</a>
+  <a href="my-orders.html">📦 My Orders</a>
+  <a href="manage-address.html">📍 Manage Address</a>
+
+  <hr>
+
+  <a href="merchant-login.html">🧑‍💼 Merchant Login</a>
+  <a href="admin-login.html">🛡️ Admin Login</a>
+</div>
+
 <!-- HEADER -->
 <header class="topbar">
-  <div onclick="history.back()">←</div>
+  <div onclick="toggleMenu()">☰</div>
   <div>Checkout</div>
   <div onclick="goHome()">🏠</div>
 </header>
 
 <div class="container">
 
-  <!-- ADDRESS -->
+  <!-- ADDRESS DISPLAY -->
   <div class="card">
     <h3>Delivery Address</h3>
     <div id="addressBox" class="address-box">
       No address selected
     </div>
-    <button class="secondary" onclick="goAddress()">
-      Manage Address
-    </button>
+    <button class="secondary" onclick="goAddress()">Manage Address</button>
   </div>
 
   <!-- PAYMENT -->
@@ -125,8 +130,7 @@
       📱 UPI (Scan & Pay)
     </div>
 
-    <div id="upiBox">
-      <p><b>Scan this QR</b></p>
+    <div id="upiBox" style="display:none;text-align:center">
       <img id="upiQR" width="220">
       <p style="font-size:13px;color:#555">
         UPI ID: paytmgr5m9yhroptys
@@ -134,9 +138,9 @@
     </div>
   </div>
 
-  <!-- TOTAL + PLACE ORDER -->
+  <!-- TOTAL + ORDER -->
   <div class="card">
-    <div class="total-box">
+    <div style="font-size:18px;font-weight:800;margin-bottom:10px">
       Total Amount: ₹<span id="total">0</span>
     </div>
     <button onclick="placeOrder()">Place Order</button>
@@ -144,14 +148,13 @@
 
 </div>
 
-<!-- SUCCESS POPUP -->
+<!-- SUCCESS BOX -->
 <div id="successBox">
   <div class="popup">
-    <h2>🎉 Order Successful!</h2>
+    <h2>🎉 Order Successful</h2>
     <p>
       Congratulations!<br>
-      Aapka order successfully place ho gaya hai.<br>
-      Thank you for shopping with <b>ISI</b> ❤️
+      Your order has been placed successfully.
     </p>
     <button onclick="goOrders()">View My Orders</button>
   </div>
@@ -159,27 +162,28 @@
 
 <!-- JS -->
 <script src="js/data.js"></script>
+<script src="js/cart.js"></script>
 
 <script>
-/* ---------- basic navigation ---------- */
+/* MENU */
+function toggleMenu(){
+  sideMenu.classList.toggle("active");
+}
 function goHome(){ location.href="index.html"; }
-function goAddress(){ location.href="manage-address.html"; }
 function goOrders(){ location.href="my-orders.html"; }
+function goAddress(){ location.href="manage-address.html"; }
 
-/* ---------- load cart & total ---------- */
+/* LOAD CART TOTAL */
 const cart = getData("cart");
-let totalAmount = 0;
-cart.forEach(p=>{
-  totalAmount += Number(p.price) * (p.qty || 1);
-});
-document.getElementById("total").innerText = totalAmount;
+let total = 0;
+cart.forEach(i=> total += Number(i.price)*(i.qty||1));
+document.getElementById("total").innerText = total;
 
-/* ---------- load primary address ---------- */
+/* LOAD PRIMARY ADDRESS */
 const addresses = getData("addresses");
 const primary = addresses.find(a=>a.primary);
-
 if(primary){
-  document.getElementById("addressBox").innerHTML = `
+  addressBox.innerHTML = `
     <b>${primary.name}</b><br>
     ${primary.mobile}<br>
     ${primary.address}<br>
@@ -187,11 +191,10 @@ if(primary){
   `;
 }
 
-/* ---------- payment ---------- */
-let paymentType = "cod";
-
+/* PAYMENT */
+let payType="cod";
 function selectPay(type){
-  paymentType = type;
+  payType=type;
   cod.classList.remove("active");
   upi.classList.remove("active");
   document.getElementById(type).classList.add("active");
@@ -199,34 +202,32 @@ function selectPay(type){
   if(type==="upi"){
     upiBox.style.display="block";
     upiQR.src =
-      "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=paytmgr5m9yhroptys&pn=ISI&am="+totalAmount;
+      "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=paytmgr5m9yhroptys&pn=ISI&am="+total;
   }else{
     upiBox.style.display="none";
   }
 }
 
-/* ---------- place order ---------- */
+/* PLACE ORDER */
 function placeOrder(){
 
   if(!primary){
-    alert("Please select a primary address");
+    alert("Please add delivery address");
     return;
   }
-
   if(cart.length===0){
     alert("Cart is empty");
     return;
   }
 
   const orders = getData("orders");
-
   orders.push({
-    id: Date.now(),
-    items: cart,
-    total: totalAmount,
-    payment: paymentType,
-    address: primary,
-    date: new Date().toLocaleString()
+    id:Date.now(),
+    items:cart,
+    total:total,
+    payment:payType,
+    address:primary,
+    date:new Date().toLocaleString()
   });
 
   setData("orders",orders);
@@ -235,20 +236,16 @@ function placeOrder(){
   showSuccess();
 }
 
-/* ---------- success animation ---------- */
+/* SUCCESS */
 function showSuccess(){
   successBox.style.display="flex";
-  confettiRain();
-}
-
-function confettiRain(){
   for(let i=0;i<40;i++){
-    const c = document.createElement("div");
+    const c=document.createElement("div");
     c.className="confetti";
-    c.style.left = Math.random()*100+"%";
-    c.style.background =
-      ["#2563eb","#22c55e","#eab308","#ec4899"][Math.floor(Math.random()*4)];
-    c.style.animationDuration = (2+Math.random()*2)+"s";
+    c.style.left=Math.random()*100+"%";
+    c.style.background=["#2563eb","#22c55e","#eab308","#ec4899"]
+      [Math.floor(Math.random()*4)];
+    c.style.animationDuration=(2+Math.random()*2)+"s";
     document.body.appendChild(c);
     setTimeout(()=>c.remove(),4000);
   }
