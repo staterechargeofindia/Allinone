@@ -8,16 +8,42 @@
 <link rel="stylesheet" href="css/style.css">
 
 <style>
+/* SIDE MENU */
+.side-menu{
+  position:fixed;
+  top:0; left:-260px;
+  width:260px; height:100%;
+  background:#fff;
+  box-shadow:4px 0 15px rgba(0,0,0,.2);
+  z-index:5000;
+  transition:.3s;
+  padding:14px;
+}
+.side-menu.active{ left:0 }
+.side-menu a{
+  display:block;
+  padding:12px 6px;
+  font-weight:600;
+  color:#2563eb;
+  text-decoration:none;
+}
+.side-menu hr{ border:none;border-top:1px solid #eee;margin:10px 0 }
+.menu-header{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+
+/* ADDRESS LIST */
 .address-card{
   background:#fff;
-  border-radius:14px;
+  border-radius:16px;
   padding:14px;
   margin-bottom:12px;
   box-shadow:0 6px 14px rgba(0,0,0,.08);
   position:relative;
 }
-
-.primary-badge{
+.primary-btn{
   position:absolute;
   top:12px;
   right:12px;
@@ -32,39 +58,45 @@
   cursor:pointer;
   background:#fff;
 }
-
-.primary-badge.active{
+.primary-btn.active{
   background:#22c55e;
   border-color:#22c55e;
   color:#fff;
-}
-
-.address-form input,
-.address-form textarea{
-  width:100%;
-  padding:12px;
-  margin-bottom:10px;
-  border-radius:12px;
-  border:1.5px solid #dbe2f0;
-  font-size:15px;
 }
 </style>
 </head>
 
 <body>
 
+<!-- SIDE MENU -->
+<div id="sideMenu" class="side-menu">
+  <div class="menu-header">
+    <b>Menu</b>
+    <span onclick="toggleMenu()">✖</span>
+  </div>
+
+  <a href="index.html">🏠 Home</a>
+  <a href="cart.html">🛒 Cart</a>
+  <a href="my-orders.html">📦 My Orders</a>
+
+  <hr>
+
+  <a href="merchant-login.html">🧑‍💼 Merchant Login</a>
+  <a href="admin-login.html">🛡️ Admin Login</a>
+</div>
+
 <!-- HEADER -->
 <header class="topbar">
-  <div onclick="history.back()">←</div>
+  <div onclick="toggleMenu()">☰</div>
   <div>Manage Address</div>
   <div onclick="goHome()">🏠</div>
 </header>
 
 <div class="container">
 
-  <!-- ADD ADDRESS FORM -->
-  <div class="card address-form">
-    <h3>Add New Address</h3>
+  <!-- ADD ADDRESS -->
+  <div class="card">
+    <h3>Add / Update Address</h3>
 
     <input id="name" placeholder="Full Name">
     <input id="mobile" placeholder="Mobile Number">
@@ -76,7 +108,7 @@
     <button onclick="saveAddress()">Save Address</button>
   </div>
 
-  <!-- ADDRESS LIST -->
+  <!-- SAVED ADDRESSES -->
   <div id="addressList"></div>
 
 </div>
@@ -85,11 +117,15 @@
 <script src="js/data.js"></script>
 
 <script>
+/* MENU */
+function toggleMenu(){
+  sideMenu.classList.toggle("active");
+}
 function goHome(){ location.href="index.html"; }
 
 let addresses = getData("addresses");
 
-/* ---------- save address ---------- */
+/* SAVE ADDRESS */
 function saveAddress(){
 
   const obj = {
@@ -104,42 +140,41 @@ function saveAddress(){
   };
 
   if(!obj.name || !obj.mobile || !obj.address){
-    alert("Please fill name, mobile & address");
+    alert("Please fill name, mobile and address");
     return;
   }
 
   addresses.push(obj);
-  setData("addresses",addresses);
+  setData("addresses", addresses);
 
   clearForm();
   renderAddresses();
 }
 
-/* ---------- set primary ---------- */
+/* SET PRIMARY */
 function setPrimary(id){
   addresses.forEach(a=>a.primary=false);
   const found = addresses.find(a=>a.id===id);
   if(found) found.primary=true;
-  setData("addresses",addresses);
+  setData("addresses", addresses);
   renderAddresses();
 }
 
-/* ---------- render ---------- */
+/* RENDER */
 function renderAddresses(){
 
-  addressList.innerHTML = "";
+  addressList.innerHTML="";
 
   if(addresses.length===0){
-    addressList.innerHTML =
-      "<p style='text-align:center;color:#6b7280'>No address saved</p>";
+    addressList.innerHTML="<p style='text-align:center'>No address saved</p>";
     return;
   }
 
   addresses.forEach(a=>{
-    const d = document.createElement("div");
+    const d=document.createElement("div");
     d.className="address-card";
-    d.innerHTML = `
-      <div class="primary-badge ${a.primary?"active":""}"
+    d.innerHTML=`
+      <div class="primary-btn ${a.primary?'active':''}"
            onclick="setPrimary(${a.id})">✓</div>
 
       <b>${a.name}</b><br>
@@ -151,7 +186,7 @@ function renderAddresses(){
   });
 }
 
-/* ---------- clear form ---------- */
+/* CLEAR */
 function clearForm(){
   name.value="";
   mobile.value="";
