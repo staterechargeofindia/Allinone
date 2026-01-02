@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ISI – My Products</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+.product-row{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+.product-row img{
+  width:80px;
+  height:80px;
+  border-radius:10px;
+  object-fit:cover;
+}
+.product-info{
+  flex:1;
+}
+.product-info h4{
+  margin:0 0 4px;
+  font-size:15px;
+}
+.product-info small{
+  color:#6b7280;
+}
+.delete-btn{
+  background:#ef4444;
+  margin-top:6px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="topbar">
+  <div onclick="history.back()">←</div>
+  <div>My Products</div>
+  <div onclick="goHome()">🏠</div>
+</header>
+
+<div class="container" id="productList"></div>
+
+<!-- JS -->
+<script src="js/data.js"></script>
+
+<script>
+function goHome(){ location.href="index.html"; }
+
+/* ---------- merchant auth ---------- */
+const merchant = JSON.parse(localStorage.getItem("merchantSession"));
+if(!merchant){
+  location.href="merchant-login.html";
+}
+
+/* ---------- load products ---------- */
+let products = getData("products").filter(
+  p => p.merchantId === merchant.id
+);
+
+function renderProducts(){
+
+  productList.innerHTML = "";
+
+  if(products.length === 0){
+    productList.innerHTML =
+      "<p style='text-align:center;color:#6b7280'>No products published yet</p>";
+    return;
+  }
+
+  products.forEach((p,index)=>{
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="product-row">
+        <img src="${p.img}">
+        <div class="product-info">
+          <h4>${p.name}</h4>
+          <small>${p.category}</small><br>
+          <small>
+            Price: ₹${p.price}
+            ${p.discount ? `(Discount ${p.discount}%)` : ""}
+          </small>
+          <button class="delete-btn" onclick="deleteProduct(${index})">
+            Delete Product
+          </button>
+        </div>
+      </div>
+    `;
+
+    productList.appendChild(card);
+  });
+}
+
+/* ---------- delete product ---------- */
+function deleteProduct(index){
+
+  if(!confirm("Are you sure you want to delete this product?")){
+    return;
+  }
+
+  const allProducts = getData("products");
+
+  const productId = products[index].id;
+
+  const updated = allProducts.filter(p => p.id !== productId);
+
+  setData("products", updated);
+
+  products.splice(index,1);
+  renderProducts();
+}
+
+renderProducts();
+</script>
+
+</body>
+</html>
