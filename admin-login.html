@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ISI – Admin Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+.login-box{
+  max-width:420px;
+  margin:50px auto;
+}
+.note{
+  font-size:13px;
+  color:#6b7280;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="topbar">
+  <div onclick="history.back()">←</div>
+  <div>Admin Login</div>
+  <div onclick="goHome()">🏠</div>
+</header>
+
+<div class="container login-box">
+
+  <div class="card">
+    <h3>Admin Login</h3>
+
+    <input id="adminId" placeholder="Admin ID">
+    <input id="adminPass" type="password" placeholder="Password">
+
+    <button onclick="adminLogin()">Login</button>
+
+    <div class="note">
+      * Only authorized admin can access panel
+    </div>
+  </div>
+
+</div>
+
+<script>
+function goHome(){ location.href="index.html"; }
+
+/*
+  Demo admin credentials
+  (Firebase / backend me baad me replace kar sakte ho)
+*/
+const ADMIN_ID = "226492031189";
+const ADMIN_PASS = "Cavpa@3961k";
+
+function adminLogin(){
+
+  const id = adminId.value.trim();
+  const pass = adminPass.value.trim();
+
+  if(!id || !pass){
+    alert("Please enter Admin ID and Password");
+    return;
+  }
+
+  if(id === ADMIN_ID && pass === ADMIN_PASS){
+    localStorage.setItem("adminSession","yes");
+    location.href = "admin.html";
+  }else{
+    alert("Invalid Admin credentials");
+  }
+}
+</script>
+
+</body>
+</html>
