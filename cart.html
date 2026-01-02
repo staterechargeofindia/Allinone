@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ISI – Cart</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+.cart-item{
+  display:flex;
+  gap:10px;
+  margin-bottom:12px;
+}
+.cart-item img{
+  width:90px;
+  height:90px;
+  border-radius:10px;
+  object-fit:cover;
+}
+.cart-info{
+  flex:1;
+}
+.cart-info h4{
+  margin:4px 0;
+  font-size:15px;
+}
+.qty-box{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-top:6px;
+}
+.qty-box button{
+  width:30px;
+  height:30px;
+  padding:0;
+  font-size:18px;
+}
+.remove-btn{
+  background:#ef4444;
+  margin-top:6px;
+}
+.total-box{
+  font-size:18px;
+  font-weight:800;
+  text-align:right;
+  margin:12px;
+}
+.empty{
+  text-align:center;
+  padding:40px;
+  color:#6b7280;
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div onclick="history.back()">←</div>
+  <div onclick="goHome()">My Cart</div>
+  <div onclick="goHome()">🏠</div>
+</header>
+
+<div id="cartList"></div>
+
+<div class="total-box">
+  Total: ₹<span id="total">0</span>
+</div>
+
+<div class="container">
+  <button onclick="goCheckout()">Proceed to Checkout</button>
+</div>
+
+<script src="js/data.js"></script>
+
+<script>
+let cart = getData("cart");
+
+function renderCart(){
+  const box = document.getElementById("cartList");
+
+  if(cart.length === 0){
+    box.innerHTML = `<div class="empty">Your cart is empty</div>`;
+    total.innerText = "0";
+    return;
+  }
+
+  box.innerHTML = cart.map((p,i)=>`
+    <div class="card cart-item">
+      <img src="${p.img || 'https://via.placeholder.com/150'}">
+      <div class="cart-info">
+        <h4>${p.name}</h4>
+        <div>₹${p.price}</div>
+
+        <div class="qty-box">
+          <button onclick="changeQty(${i},-1)">−</button>
+          <span>${p.qty || 1}</span>
+          <button onclick="changeQty(${i},1)">+</button>
+        </div>
+
+        <button class="remove-btn" onclick="removeItem(${i})">
+          Remove
+        </button>
+      </div>
+    </div>
+  `).join("");
+
+  updateTotal();
+}
+
+function changeQty(index,delta){
+  cart[index].qty = (cart[index].qty || 1) + delta;
+  if(cart[index].qty < 1) cart[index].qty = 1;
+  setData("cart",cart);
+  renderCart();
+}
+
+function removeItem(index){
+  cart.splice(index,1);
+  setData("cart",cart);
+  renderCart();
+}
+
+function updateTotal(){
+  let sum = 0;
+  cart.forEach(p=>{
+    sum += Number(p.price) * (p.qty || 1);
+  });
+  total.innerText = sum;
+}
+
+function goCheckout(){
+  if(cart.length === 0){
+    alert("Cart is empty");
+    return;
+  }
+  location.href = "checkout.html";
+}
+
+function goHome(){
+  location.href = "index.html";
+}
+
+renderCart();
+</script>
+
+</body>
+</html>
