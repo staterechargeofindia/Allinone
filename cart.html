@@ -8,143 +8,131 @@
 <link rel="stylesheet" href="css/style.css">
 
 <style>
-.cart-item{
-  display:flex;
-  gap:10px;
-  margin-bottom:12px;
+.cart-footer{
+  position:sticky;
+  bottom:0;
+  background:#fff;
+  padding:12px;
+  box-shadow:0 -4px 12px rgba(0,0,0,.1);
 }
-.cart-item img{
-  width:90px;
-  height:90px;
-  border-radius:10px;
-  object-fit:cover;
-}
-.cart-info{
-  flex:1;
-}
-.cart-info h4{
-  margin:4px 0;
-  font-size:15px;
-}
-.qty-box{
-  display:flex;
-  gap:8px;
-  align-items:center;
-  margin-top:6px;
-}
-.qty-box button{
-  width:30px;
-  height:30px;
-  padding:0;
-  font-size:18px;
-}
-.remove-btn{
-  background:#ef4444;
-  margin-top:6px;
-}
-.total-box{
-  font-size:18px;
+.qty-btn{
+  padding:6px 10px;
+  border-radius:8px;
+  background:#e6edff;
+  color:#2563eb;
   font-weight:800;
-  text-align:right;
-  margin:12px;
-}
-.empty{
-  text-align:center;
-  padding:40px;
-  color:#6b7280;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
+<!-- SIDE MENU -->
+<div id="sideMenu" class="side-menu">
+  <div class="menu-header">
+    <b>Menu</b>
+    <span onclick="toggleMenu()">✖</span>
+  </div>
+
+  <a href="index.html">🏠 Home</a>
+  <a href="cart.html">🛒 Cart</a>
+  <a href="my-orders.html">📦 My Orders</a>
+  <a href="manage-address.html">📍 Manage Address</a>
+
+  <hr>
+
+  <a href="merchant-login.html">🧑‍💼 Merchant Login</a>
+  <a href="merchant-dashboard.html">📊 Merchant Dashboard</a>
+
+  <hr>
+
+  <a href="admin-login.html">🛡️ Admin Login</a>
+  <a href="admin.html">⚙️ Admin Panel</a>
+</div>
+
+<!-- HEADER -->
 <header class="topbar">
-  <div onclick="history.back()">←</div>
-  <div onclick="goHome()">My Cart</div>
+  <div onclick="toggleMenu()">☰</div>
+  <div>My Cart</div>
   <div onclick="goHome()">🏠</div>
 </header>
 
-<div id="cartList"></div>
+<div class="container">
 
-<div class="total-box">
-  Total: ₹<span id="total">0</span>
+  <div id="cartList"></div>
+
 </div>
 
-<div class="container">
+<div class="cart-footer">
+  <div style="font-weight:800;font-size:18px;margin-bottom:8px">
+    Total: ₹<span id="total">0</span>
+  </div>
   <button onclick="goCheckout()">Proceed to Checkout</button>
 </div>
 
+<!-- JS -->
 <script src="js/data.js"></script>
+<script src="js/cart.js"></script>
 
 <script>
-let cart = getData("cart");
+/* SIDE MENU */
+function toggleMenu(){
+  document.getElementById("sideMenu").classList.toggle("active");
+}
 
+/* NAV */
+function goHome(){ location.href="index.html"; }
+function goCheckout(){ location.href="checkout.html"; }
+
+/* RENDER CART */
 function renderCart(){
+
+  const cart = getData("cart");
   const box = document.getElementById("cartList");
 
-  if(cart.length === 0){
-    box.innerHTML = `<div class="empty">Your cart is empty</div>`;
-    total.innerText = "0";
+  if(cart.length===0){
+    box.innerHTML="<p style='text-align:center'>Your cart is empty</p>";
+    document.getElementById("total").innerText=0;
     return;
   }
 
-  box.innerHTML = cart.map((p,i)=>`
-    <div class="card cart-item">
-      <img src="${p.img || 'https://via.placeholder.com/150'}">
-      <div class="cart-info">
-        <h4>${p.name}</h4>
-        <div>₹${p.price}</div>
+  let total=0;
+  box.innerHTML="";
 
-        <div class="qty-box">
-          <button onclick="changeQty(${i},-1)">−</button>
-          <span>${p.qty || 1}</span>
-          <button onclick="changeQty(${i},1)">+</button>
+  cart.forEach(item=>{
+    total += Number(item.price) * (item.qty||1);
+
+    const div=document.createElement("div");
+    div.className="card cart-item";
+
+    div.innerHTML=`
+      <img src="${item.img}">
+      <div style="flex:1">
+        <h4>${item.name}</h4>
+        <div>₹${item.price}</div>
+
+        <div style="display:flex;align-items:center;gap:8px;margin:6px 0">
+          <span class="qty-btn" onclick="changeCartQty(${item.id},-1)">−</span>
+          <b>${item.qty||1}</b>
+          <span class="qty-btn" onclick="changeCartQty(${item.id},1)">+</span>
         </div>
 
-        <button class="remove-btn" onclick="removeItem(${i})">
+        <button class="secondary" onclick="removeCartItem(${item.id})">
           Remove
         </button>
       </div>
-    </div>
-  `).join("");
+    `;
 
-  updateTotal();
-}
-
-function changeQty(index,delta){
-  cart[index].qty = (cart[index].qty || 1) + delta;
-  if(cart[index].qty < 1) cart[index].qty = 1;
-  setData("cart",cart);
-  renderCart();
-}
-
-function removeItem(index){
-  cart.splice(index,1);
-  setData("cart",cart);
-  renderCart();
-}
-
-function updateTotal(){
-  let sum = 0;
-  cart.forEach(p=>{
-    sum += Number(p.price) * (p.qty || 1);
+    box.appendChild(div);
   });
-  total.innerText = sum;
+
+  document.getElementById("total").innerText=total;
 }
 
-function goCheckout(){
-  if(cart.length === 0){
-    alert("Cart is empty");
-    return;
-  }
-  location.href = "checkout.html";
-}
-
-function goHome(){
-  location.href = "index.html";
-}
-
+/* INIT */
 renderCart();
+updateCartCount();
 </script>
 
 </body>
