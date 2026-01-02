@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="css/style.css">
 
 <style>
+/* SEARCH */
 .search-box{
   padding:12px;
 }
@@ -17,6 +18,8 @@
   border-radius:12px;
   border:1px solid #ccc;
 }
+
+/* CATEGORY */
 .categories{
   display:flex;
   overflow-x:auto;
@@ -24,58 +27,82 @@
   gap:8px;
 }
 .categories::-webkit-scrollbar{display:none}
-.category{
-  padding:8px 14px;
-  border-radius:999px;
-  background:#e6edff;
-  color:#2563eb;
-  font-weight:600;
-  cursor:pointer;
-  white-space:nowrap;
-}
-.category.active{
-  background:#2563eb;
-  color:#fff;
-}
-.product-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-  padding:12px;
-}
-.product-card{
+
+/* SIDE MENU */
+.side-menu{
+  position:fixed;
+  top:0;
+  left:-260px;
+  width:260px;
+  height:100%;
   background:#fff;
-  border-radius:14px;
-  padding:10px;
-  box-shadow:0 6px 14px rgba(0,0,0,.08);
+  box-shadow:4px 0 15px rgba(0,0,0,.2);
+  z-index:5000;
+  transition:.3s;
+  padding:14px;
 }
-.product-card img{
-  width:100%;
-  border-radius:12px;
+.side-menu.active{
+  left:0;
 }
-.product-card h4{
-  margin:6px 0;
-  font-size:15px;
+.side-menu a{
+  display:block;
+  padding:12px 6px;
+  font-weight:600;
+  color:#2563eb;
+  text-decoration:none;
 }
-.price{
-  font-weight:700;
-  margin-bottom:6px;
+.side-menu hr{
+  border:none;
+  border-top:1px solid #eee;
+  margin:10px 0;
+}
+.menu-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
 }
 </style>
 </head>
 
 <body>
 
+<!-- SIDE MENU -->
+<div id="sideMenu" class="side-menu">
+  <div class="menu-header">
+    <b>Menu</b>
+    <span onclick="toggleMenu()">✖</span>
+  </div>
+
+  <a href="index.html">🏠 Home</a>
+  <a href="cart.html">🛒 Cart</a>
+  <a href="my-orders.html">📦 My Orders</a>
+  <a href="manage-address.html">📍 Manage Address</a>
+
+  <hr>
+
+  <a href="merchant-login.html">🧑‍💼 Merchant Login</a>
+  <a href="merchant-dashboard.html">📊 Merchant Dashboard</a>
+
+  <hr>
+
+  <a href="admin-login.html">🛡️ Admin Login</a>
+  <a href="admin.html">⚙️ Admin Panel</a>
+</div>
+
+<!-- HEADER -->
 <header class="topbar">
-  <div onclick="history.back()">←</div>
+  <div onclick="toggleMenu()">☰</div>
   <div onclick="goHome()">ISI</div>
   <div onclick="goCart()">🛒 <span id="cartCount">0</span></div>
 </header>
 
+<!-- SEARCH -->
 <div class="search-box">
   <input type="text" id="search" placeholder="Search products..." onkeyup="searchProduct()">
 </div>
 
+<!-- CATEGORIES -->
 <div class="categories">
   <div class="category active" onclick="filterCat('all',this)">All</div>
   <div class="category" onclick="filterCat('Fashion',this)">Fashion</div>
@@ -89,19 +116,34 @@
   <div class="category" onclick="filterCat('Mithai',this)">Mithai</div>
 </div>
 
+<!-- PRODUCTS -->
 <div id="productList" class="product-grid"></div>
 
+<!-- JS -->
 <script src="js/data.js"></script>
+<script src="js/cart.js"></script>
 
 <script>
 let allProducts = getData("products");
 
+/* SIDE MENU */
+function toggleMenu(){
+  document.getElementById("sideMenu").classList.toggle("active");
+}
+
+/* NAV */
+function goHome(){ location.href="index.html"; }
+function goCart(){ location.href="cart.html"; }
+
+/* RENDER PRODUCTS */
 function render(products){
   const box = document.getElementById("productList");
+
   if(!products.length){
     box.innerHTML="<p style='text-align:center'>No products available</p>";
     return;
   }
+
   box.innerHTML = products.map(p=>`
     <div class="product-card">
       <img src="${p.img || 'https://via.placeholder.com/300'}">
@@ -112,34 +154,22 @@ function render(products){
   `).join("");
 }
 
+/* CATEGORY FILTER */
 function filterCat(cat,el){
   document.querySelectorAll(".category").forEach(c=>c.classList.remove("active"));
   el.classList.add("active");
+
   if(cat==="all") render(allProducts);
   else render(allProducts.filter(p=>p.category===cat));
 }
 
+/* SEARCH */
 function searchProduct(){
   const q = search.value.toLowerCase();
   render(allProducts.filter(p=>p.name.toLowerCase().includes(q)));
 }
 
-function addToCart(id){
-  const cart = getData("cart");
-  const item = allProducts.find(p=>p.id===id);
-  cart.push(item);
-  setData("cart",cart);
-  updateCartCount();
-  alert("Added to cart");
-}
-
-function updateCartCount(){
-  cartCount.innerText = getData("cart").length;
-}
-
-function goCart(){ location.href="cart.html"; }
-function goHome(){ location.href="index.html"; }
-
+/* INIT */
 render(allProducts);
 updateCartCount();
 </script>
