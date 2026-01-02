@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ISI – Merchant Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+.dashboard-btn{
+  margin-bottom:12px;
+}
+.profile-box{
+  background:#e6edff;
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:14px;
+}
+.profile-box b{
+  display:block;
+  margin-bottom:4px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="topbar">
+  <div onclick="history.back()">←</div>
+  <div>Merchant Dashboard</div>
+  <div onclick="goHome()">🏠</div>
+</header>
+
+<div class="container">
+
+  <!-- MERCHANT INFO -->
+  <div class="profile-box" id="merchantInfo"></div>
+
+  <!-- ACTIONS -->
+  <div class="card">
+    <button class="dashboard-btn" onclick="goPublish()">
+      ➕ Publish New Product
+    </button>
+
+    <button class="dashboard-btn secondary" onclick="goMyProducts()">
+      📦 My Products
+    </button>
+
+    <button class="dashboard-btn secondary" onclick="goOrders()">
+      🧾 My Orders
+    </button>
+
+    <button class="dashboard-btn" style="background:#ef4444"
+      onclick="logout()">
+      🚪 Logout
+    </button>
+  </div>
+
+</div>
+
+<!-- JS -->
+<script src="js/data.js"></script>
+
+<script>
+function goHome(){ location.href="index.html"; }
+
+/* ---------- auth check ---------- */
+const merchant = JSON.parse(localStorage.getItem("merchantSession"));
+if(!merchant){
+  location.href="merchant-login.html";
+}
+
+/* ---------- show merchant info ---------- */
+merchantInfo.innerHTML = `
+  <b>${merchant.shopName}</b>
+  <small>Merchant ID: ${merchant.id}</small>
+`;
+
+/* ---------- navigation ---------- */
+function goPublish(){
+  location.href="publish-product.html";
+}
+
+function goMyProducts(){
+  location.href="merchant-products.html";
+}
+
+function goOrders(){
+  location.href="merchant-orders.html";
+}
+
+/* ---------- logout ---------- */
+function logout(){
+  localStorage.removeItem("merchantSession");
+  location.href="merchant-login.html";
+}
+</script>
+
+</body>
+</html>
