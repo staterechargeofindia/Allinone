@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ISI – Manage Address</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+.address-card{
+  background:#fff;
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:12px;
+  box-shadow:0 6px 14px rgba(0,0,0,.08);
+  position:relative;
+}
+
+.primary-badge{
+  position:absolute;
+  top:12px;
+  right:12px;
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  border:2px solid #2563eb;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  cursor:pointer;
+  background:#fff;
+}
+
+.primary-badge.active{
+  background:#22c55e;
+  border-color:#22c55e;
+  color:#fff;
+}
+
+.address-form input,
+.address-form textarea{
+  width:100%;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:12px;
+  border:1.5px solid #dbe2f0;
+  font-size:15px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="topbar">
+  <div onclick="history.back()">←</div>
+  <div>Manage Address</div>
+  <div onclick="goHome()">🏠</div>
+</header>
+
+<div class="container">
+
+  <!-- ADD ADDRESS FORM -->
+  <div class="card address-form">
+    <h3>Add New Address</h3>
+
+    <input id="name" placeholder="Full Name">
+    <input id="mobile" placeholder="Mobile Number">
+    <textarea id="address" placeholder="House / Street / Area"></textarea>
+    <input id="district" placeholder="District">
+    <input id="state" placeholder="State">
+    <input id="pincode" placeholder="Pin Code">
+
+    <button onclick="saveAddress()">Save Address</button>
+  </div>
+
+  <!-- ADDRESS LIST -->
+  <div id="addressList"></div>
+
+</div>
+
+<!-- JS -->
+<script src="js/data.js"></script>
+
+<script>
+function goHome(){ location.href="index.html"; }
+
+let addresses = getData("addresses");
+
+/* ---------- save address ---------- */
+function saveAddress(){
+
+  const obj = {
+    id: Date.now(),
+    name: name.value.trim(),
+    mobile: mobile.value.trim(),
+    address: address.value.trim(),
+    district: district.value.trim(),
+    state: state.value.trim(),
+    pincode: pincode.value.trim(),
+    primary: addresses.length === 0
+  };
+
+  if(!obj.name || !obj.mobile || !obj.address){
+    alert("Please fill name, mobile & address");
+    return;
+  }
+
+  addresses.push(obj);
+  setData("addresses",addresses);
+
+  clearForm();
+  renderAddresses();
+}
+
+/* ---------- set primary ---------- */
+function setPrimary(id){
+  addresses.forEach(a=>a.primary=false);
+  const found = addresses.find(a=>a.id===id);
+  if(found) found.primary=true;
+  setData("addresses",addresses);
+  renderAddresses();
+}
+
+/* ---------- render ---------- */
+function renderAddresses(){
+
+  addressList.innerHTML = "";
+
+  if(addresses.length===0){
+    addressList.innerHTML =
+      "<p style='text-align:center;color:#6b7280'>No address saved</p>";
+    return;
+  }
+
+  addresses.forEach(a=>{
+    const d = document.createElement("div");
+    d.className="address-card";
+    d.innerHTML = `
+      <div class="primary-badge ${a.primary?"active":""}"
+           onclick="setPrimary(${a.id})">✓</div>
+
+      <b>${a.name}</b><br>
+      ${a.mobile}<br>
+      ${a.address}<br>
+      ${a.district}, ${a.state} - ${a.pincode}
+    `;
+    addressList.appendChild(d);
+  });
+}
+
+/* ---------- clear form ---------- */
+function clearForm(){
+  name.value="";
+  mobile.value="";
+  address.value="";
+  district.value="";
+  state.value="";
+  pincode.value="";
+}
+
+renderAddresses();
+</script>
+
+</body>
+</html>
