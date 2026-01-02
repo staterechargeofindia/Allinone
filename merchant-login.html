@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ISI – Merchant Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+.login-box{
+  max-width:420px;
+  margin:40px auto;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="topbar">
+  <div onclick="history.back()">←</div>
+  <div>Merchant Login</div>
+  <div onclick="goHome()">🏠</div>
+</header>
+
+<div class="container login-box">
+
+  <div class="card">
+    <h3>Merchant Login</h3>
+
+    <input id="merchantId" placeholder="Merchant ID">
+    <input id="merchantPass" type="password" placeholder="Password">
+
+    <button onclick="merchantLogin()">Login</button>
+
+    <p style="margin-top:10px;font-size:14px;color:#6b7280">
+      * Only approved merchants can login
+    </p>
+  </div>
+
+</div>
+
+<!-- JS -->
+<script src="js/data.js"></script>
+
+<script>
+function goHome(){ location.href="index.html"; }
+
+/*
+  For now:
+  - Admin will create merchants later
+  - Demo login is stored in localStorage
+*/
+
+function merchantLogin(){
+
+  const id = merchantId.value.trim();
+  const pass = merchantPass.value.trim();
+
+  if(!id || !pass){
+    alert("Please enter Merchant ID and Password");
+    return;
+  }
+
+  // Demo merchant list (future: admin controlled)
+  const merchants = getData("merchants");
+
+  const found = merchants.find(m =>
+    m.id === id && m.password === pass
+  );
+
+  if(!found){
+    alert("Invalid Merchant ID or Password");
+    return;
+  }
+
+  // Save merchant session
+  localStorage.setItem("merchantSession", JSON.stringify(found));
+
+  location.href = "merchant-dashboard.html";
+}
+</script>
+
+</body>
+</html>
