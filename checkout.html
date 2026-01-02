@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ISI – Checkout</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+/* ---------- extra checkout styles ---------- */
+.address-box{
+  background:#f9fbff;
+  border:2px dashed #2563eb;
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:12px;
+  font-size:14px;
+  line-height:1.6;
+}
+
+.method{
+  padding:14px;
+  border-radius:14px;
+  border:2px solid #e6edff;
+  background:#f9fbff;
+  font-weight:700;
+  cursor:pointer;
+  margin-bottom:10px;
+}
+
+.method.active{
+  border-color:#2563eb;
+  background:#e6edff;
+}
+
+#upiBox{
+  display:none;
+  text-align:center;
+  margin-top:10px;
+}
+
+.total-box{
+  font-size:18px;
+  font-weight:800;
+  margin-bottom:12px;
+}
+
+/* ---------- success popup + confetti ---------- */
+#successBox{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:3000;
+}
+
+.popup{
+  background:#fff;
+  padding:24px;
+  border-radius:18px;
+  width:90%;
+  max-width:360px;
+  text-align:center;
+  animation:zoom .3s ease;
+}
+
+@keyframes zoom{
+  from{transform:scale(.8);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+.confetti{
+  position:fixed;
+  top:-10px;
+  width:8px;
+  height:14px;
+  opacity:.9;
+  animation:fall linear forwards;
+  pointer-events:none;
+}
+
+@keyframes fall{
+  to{
+    transform:translateY(110vh) rotate(360deg);
+    opacity:0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="topbar">
+  <div onclick="history.back()">←</div>
+  <div>Checkout</div>
+  <div onclick="goHome()">🏠</div>
+</header>
+
+<div class="container">
+
+  <!-- ADDRESS -->
+  <div class="card">
+    <h3>Delivery Address</h3>
+    <div id="addressBox" class="address-box">
+      No address selected
+    </div>
+    <button class="secondary" onclick="goAddress()">
+      Manage Address
+    </button>
+  </div>
+
+  <!-- PAYMENT -->
+  <div class="card">
+    <h3>Payment Method</h3>
+
+    <div id="cod" class="method active" onclick="selectPay('cod')">
+      💵 Cash on Delivery
+    </div>
+
+    <div id="upi" class="method" onclick="selectPay('upi')">
+      📱 UPI (Scan & Pay)
+    </div>
+
+    <div id="upiBox">
+      <p><b>Scan this QR</b></p>
+      <img id="upiQR" width="220">
+      <p style="font-size:13px;color:#555">
+        UPI ID: paytmgr5m9yhroptys
+      </p>
+    </div>
+  </div>
+
+  <!-- TOTAL + PLACE ORDER -->
+  <div class="card">
+    <div class="total-box">
+      Total Amount: ₹<span id="total">0</span>
+    </div>
+    <button onclick="placeOrder()">Place Order</button>
+  </div>
+
+</div>
+
+<!-- SUCCESS POPUP -->
+<div id="successBox">
+  <div class="popup">
+    <h2>🎉 Order Successful!</h2>
+    <p>
+      Congratulations!<br>
+      Aapka order successfully place ho gaya hai.<br>
+      Thank you for shopping with <b>ISI</b> ❤️
+    </p>
+    <button onclick="goOrders()">View My Orders</button>
+  </div>
+</div>
+
+<!-- JS -->
+<script src="js/data.js"></script>
+
+<script>
+/* ---------- basic navigation ---------- */
+function goHome(){ location.href="index.html"; }
+function goAddress(){ location.href="manage-address.html"; }
+function goOrders(){ location.href="my-orders.html"; }
+
+/* ---------- load cart & total ---------- */
+const cart = getData("cart");
+let totalAmount = 0;
+cart.forEach(p=>{
+  totalAmount += Number(p.price) * (p.qty || 1);
+});
+document.getElementById("total").innerText = totalAmount;
+
+/* ---------- load primary address ---------- */
+const addresses = getData("addresses");
+const primary = addresses.find(a=>a.primary);
+
+if(primary){
+  document.getElementById("addressBox").innerHTML = `
+    <b>${primary.name}</b><br>
+    ${primary.mobile}<br>
+    ${primary.address}<br>
+    ${primary.district}, ${primary.state} - ${primary.pincode}
+  `;
+}
+
+/* ---------- payment ---------- */
+let paymentType = "cod";
+
+function selectPay(type){
+  paymentType = type;
+  cod.classList.remove("active");
+  upi.classList.remove("active");
+  document.getElementById(type).classList.add("active");
+
+  if(type==="upi"){
+    upiBox.style.display="block";
+    upiQR.src =
+      "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=paytmgr5m9yhroptys&pn=ISI&am="+totalAmount;
+  }else{
+    upiBox.style.display="none";
+  }
+}
+
+/* ---------- place order ---------- */
+function placeOrder(){
+
+  if(!primary){
+    alert("Please select a primary address");
+    return;
+  }
+
+  if(cart.length===0){
+    alert("Cart is empty");
+    return;
+  }
+
+  const orders = getData("orders");
+
+  orders.push({
+    id: Date.now(),
+    items: cart,
+    total: totalAmount,
+    payment: paymentType,
+    address: primary,
+    date: new Date().toLocaleString()
+  });
+
+  setData("orders",orders);
+  setData("cart",[]);
+
+  showSuccess();
+}
+
+/* ---------- success animation ---------- */
+function showSuccess(){
+  successBox.style.display="flex";
+  confettiRain();
+}
+
+function confettiRain(){
+  for(let i=0;i<40;i++){
+    const c = document.createElement("div");
+    c.className="confetti";
+    c.style.left = Math.random()*100+"%";
+    c.style.background =
+      ["#2563eb","#22c55e","#eab308","#ec4899"][Math.floor(Math.random()*4)];
+    c.style.animationDuration = (2+Math.random()*2)+"s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4000);
+  }
+}
+</script>
+
+</body>
+</html>
