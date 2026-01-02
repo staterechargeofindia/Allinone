@@ -8,6 +8,37 @@
 <link rel="stylesheet" href="css/style.css">
 
 <style>
+/* SIDE MENU */
+.side-menu{
+  position:fixed;
+  top:0; left:-260px;
+  width:260px; height:100%;
+  background:#fff;
+  box-shadow:4px 0 15px rgba(0,0,0,.2);
+  z-index:5000;
+  transition:.3s;
+  padding:14px;
+}
+.side-menu.active{ left:0 }
+.side-menu a{
+  display:block;
+  padding:12px 6px;
+  font-weight:600;
+  color:#2563eb;
+  text-decoration:none;
+}
+.side-menu hr{
+  border:none;
+  border-top:1px solid #eee;
+  margin:10px 0;
+}
+.menu-header{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+
+/* ORDER CARD */
 .order-card{
   background:#fff;
   border-radius:16px;
@@ -15,28 +46,19 @@
   margin-bottom:14px;
   box-shadow:0 6px 14px rgba(0,0,0,.08);
 }
-
 .order-id{
   font-weight:800;
   margin-bottom:6px;
 }
-
 .order-date{
   font-size:13px;
   color:#6b7280;
-  margin-bottom:8px;
+  margin-bottom:6px;
 }
-
 .order-item{
   font-size:14px;
   margin-bottom:4px;
 }
-
-.order-total{
-  font-weight:800;
-  margin-top:8px;
-}
-
 .empty{
   text-align:center;
   padding:40px;
@@ -47,9 +69,26 @@
 
 <body>
 
+<!-- SIDE MENU -->
+<div id="sideMenu" class="side-menu">
+  <div class="menu-header">
+    <b>Menu</b>
+    <span onclick="toggleMenu()">✖</span>
+  </div>
+
+  <a href="index.html">🏠 Home</a>
+  <a href="cart.html">🛒 Cart</a>
+  <a href="manage-address.html">📍 Manage Address</a>
+
+  <hr>
+
+  <a href="merchant-login.html">🧑‍💼 Merchant Login</a>
+  <a href="admin-login.html">🛡️ Admin Login</a>
+</div>
+
 <!-- HEADER -->
 <header class="topbar">
-  <div onclick="history.back()">←</div>
+  <div onclick="toggleMenu()">☰</div>
   <div>My Orders</div>
   <div onclick="goHome()">🏠</div>
 </header>
@@ -60,53 +99,56 @@
 <script src="js/data.js"></script>
 
 <script>
+/* MENU */
+function toggleMenu(){
+  sideMenu.classList.toggle("active");
+}
 function goHome(){ location.href="index.html"; }
 
+/* LOAD ORDERS */
 const orders = getData("orders");
+const box = document.getElementById("orderList");
 
-if(orders.length === 0){
-
-  orderList.innerHTML =
-    `<div class="empty">You have not placed any order yet</div>`;
-
+if(orders.length===0){
+  box.innerHTML="<div class='empty'>No orders placed yet</div>";
 }else{
 
-  orders.slice().reverse().forEach(order=>{
+  orders.slice().reverse().forEach(o=>{
 
-    const card = document.createElement("div");
-    card.className = "order-card";
+    const d=document.createElement("div");
+    d.className="order-card";
 
-    card.innerHTML = `
-      <div class="order-id">Order ID: ${order.id}</div>
-      <div class="order-date">${order.date}</div>
+    d.innerHTML=`
+      <div class="order-id">Order #${o.id}</div>
+      <div class="order-date">${o.date}</div>
 
       <div class="order-item">
-        <b>Payment:</b> ${order.payment.toUpperCase()}
+        <b>Payment:</b> ${o.payment.toUpperCase()}
       </div>
 
       <div class="order-item">
         <b>Delivery Address:</b><br>
-        ${order.address.name}<br>
-        ${order.address.mobile}<br>
-        ${order.address.address}<br>
-        ${order.address.district}, ${order.address.state} - ${order.address.pincode}
+        ${o.address.name}<br>
+        ${o.address.mobile}<br>
+        ${o.address.address}<br>
+        ${o.address.district}, ${o.address.state} - ${o.address.pincode}
       </div>
 
       <div class="order-item">
         <b>Items:</b>
         <ul>
-          ${order.items.map(i=>`
-            <li>${i.name} × ${i.qty || 1} — ₹${i.price}</li>
+          ${o.items.map(i=>`
+            <li>${i.name} × ${i.qty||1}</li>
           `).join("")}
         </ul>
       </div>
 
-      <div class="order-total">
-        Total Paid: ₹${order.total}
+      <div style="font-weight:800;margin-top:6px">
+        Total Paid: ₹${o.total}
       </div>
     `;
 
-    orderList.appendChild(card);
+    box.appendChild(d);
   });
 }
 </script>
